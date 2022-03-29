@@ -10,17 +10,33 @@ object Generator {
     private val registry = mutableMapOf<KClass<*>, Any>()
 
     init {
-        registry.clear()
-        registry[Int::class] = 0
-        registry[Byte::class] = 0.toByte()
-        registry[Char::class] = 0.toChar()
-        registry[Double::class] = 0.toDouble()
-        registry[Float::class] = 0.toFloat()
-        registry[Short::class] = 0.toShort()
-        registry[Long::class] = 0.toLong()
-        registry[Boolean::class] = false
-        registry[String::class] = "0"
+        reset()
     }
+
+    fun reset() {
+        registry.clear()
+        register(0)
+        register(0.toByte())
+        register(0.toChar())
+        register(0.toDouble())
+        register(0.toFloat())
+        register(0.toShort())
+        register(0.toLong())
+        register(false)
+        register("0")
+    }
+
+    inline fun <reified T : Any> register(value: T) {
+        register(T::class, value)
+    }
+
+    fun <T : Any> register(kClass: KClass<T>, value: T) {
+        if (kClass.typeParameters.isNotEmpty()) {
+            throw IllegalArgumentException("Registering generic classes is not supported")
+        }
+        registry[kClass] = value
+    }
+
 
     inline fun < reified T : Any> default(): T {
         return default(T::class, typeOf<T>().arguments) as T
