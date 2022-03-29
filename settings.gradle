@@ -13,5 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "DummyObjectGenerator"
-include ':app'
 include ':DummyObjectGenerator'
