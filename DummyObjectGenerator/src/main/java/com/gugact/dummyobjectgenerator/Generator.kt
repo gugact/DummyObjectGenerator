@@ -57,7 +57,7 @@ object Generator {
         }
     }
 
-    private fun <T : Any> defaultDataClass(kClass: KClass<T>): T {
+    private fun defaultDataClass(kClass: KClass<*>): Any {
         val constructor = kClass.primaryConstructor
             ?: throw IllegalArgumentException("No primary constructor found for data class $kClass")
         val arguments = constructor.parameters
