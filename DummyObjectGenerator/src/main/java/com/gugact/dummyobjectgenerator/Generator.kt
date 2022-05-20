@@ -2,6 +2,7 @@ package com.gugact.dummyobjectgenerator
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
@@ -38,11 +39,11 @@ object Generator {
     }
 
 
-    inline fun < reified T : Any> default(): T {
+    inline fun <reified T : Any> default(): T {
         return default(T::class, typeOf<T>().arguments) as T
     }
 
-    fun default(kClass: KClass<*>?, argumentsList: List<KTypeProjection>?): Any{
+    fun default(kClass: KClass<*>?, argumentsList: List<KTypeProjection>?): Any {
         return registry[kClass] ?: run {
             when {
                 kClass?.isData == true -> defaultDataClass(kClass)
@@ -72,4 +73,12 @@ object Generator {
 
     private fun List<KTypeProjection>?.getArgumentsFromIndex(index: Int) = this?.get(index)?.type?.arguments
     private fun List<KTypeProjection>?.getClassFromIndex(index: Int) = this?.get(index)?.type?.classifier as? KClass<*>
+
+    inline fun <reified T : Any> T.forEachMember(action: (Any?) -> Unit) {
+        for (prop in T::class.memberProperties) {
+            action(prop.call(*(prop.parameters.map { param ->
+                default(param.type.classifier as KClass<*>, param.type.arguments)
+            }.toTypedArray())))
+        }
+    }
 }
