@@ -2,6 +2,8 @@ package com.gugact.dummyobjectgenerator
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
@@ -76,9 +78,23 @@ object Generator {
 
     inline fun <reified T : Any> T.forEachMember(action: (Any?) -> Unit) {
         for (prop in T::class.memberProperties) {
-            action(prop.call(*(prop.parameters.map { param ->
-                default(param.type.classifier as KClass<*>, param.type.arguments)
-            }.toTypedArray())))
+            if (prop.visibility == KVisibility.PUBLIC)
+                action(prop.call(*(prop.parameters.map { param ->
+                    default(param.type.classifier as KClass<*>, param.type.arguments)
+                }.toTypedArray())))
+        }
+    }
+
+    inline fun <reified T : Any> T.forEachFunction(action: (Any?) -> Unit) {
+        for (prop in T::class.functions) {
+            if (prop.visibility == KVisibility.PUBLIC)
+                try {
+                    action(prop.call(*(prop.parameters.map { param ->
+                        default(param.type.classifier as KClass<*>, param.type.arguments)
+                    }.toTypedArray())))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
         }
     }
 }
